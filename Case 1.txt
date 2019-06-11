@@ -1,0 +1,21 @@
+Case 1: In dealing with read latencies in web applications, one of the solution is to cache the data that you just retrieved from the DB and in the subsequent request, respond to the request for data from the cache without hitting the database. 
+Seems very easy and straight forward right?
+The code below appears to race the cache against the network, using the fastest returned resource.
+Promise.race([getFromCache, fetchFromNetwork])
+.then(function(resource) {
+  console.log('Fastest resource:', resource);
+})
+.catch(function(reason) {
+  console.log('Could not get resource:', reason);
+});
+Do you think I should implement this code in my app?
+
+Answer: I do NOT think you should implement this code in your app.
+Reason: Promise.race() returns as soon as any of the functions resolves or rejects, 
+this mode of operation of the promise.race() function definitely helps reduce read latency because 
+it returns when either one of the operations completes the problem arises when the first completed operation rejects instead of resolves. 
+In this scenario there would not be any desired data returned but an error message.
+
+Potential Solution: We know that fetching data locally from the cache is faster than 
+fetching data over the network so it would be better to query the cache first to check to see if the desired data is returned and 
+if not fetch from the network this way we would reduce read latency and still have a functioning app if no data was cached.
